@@ -8,7 +8,10 @@ mod vga_buffer;
 
 #[no_mangle]  //disabling mangling for this fn so that it can be used by the linker - linker will look for fn named _start without main
 pub extern "C" fn _start() -> ! {
-    vga_buffer::print_something();
+    println!("BIG FAT STINKING CRAPS AND FARTS ALSO{}", "!");
+    
+    !("asihofqweginuwguyinw3inugy uinywe gnuiewr g")
+    panic!("crapping and also farting");
 
     loop{}
 }
@@ -17,6 +20,7 @@ pub extern "C" fn _start() -> ! {
 //Called on panic
 use core::panic::PanicInfo;
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop{}
+fn panic(info: &PanicInfo) -> ! {
+    println!("{}", info);
+    loop {}
 }
