@@ -10,7 +10,7 @@ mod vga_buffer;
 pub extern "C" fn _start() -> ! {
     println!("BIG FAT STINKING CRAPS AND FARTS ALSO{}", "!");
     
-    !("asihofqweginuwguyinw3inugy uinywe gnuiewr g")
+
     panic!("crapping and also farting");
 
     loop{}
