@@ -1,74 +1,42 @@
-// main
-#![reexport_test_harness_main = "test_main"]
+#![no_std]
+#![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(crate::test_runner)]
-#![no_std]   //not using the standard library
-#![no_main]  //disabling main (all rust-level entry points)
+#![test_runner(blog_os::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
-mod serial;
-mod vga_buffer;
+use core::panic::PanicInfo;
+use blog_os::println;
 
-#[no_mangle]  //disabling mangling for this fn so that it can be used by the linker - linker will look for fn named _start without main
+#[no_mangle]
 pub extern "C" fn _start() -> ! {
-    println!("BIG FAT STINKING CRAPS AND FARTS ALSO{}", "!");
+    println!("DIRTY HARD CRAPS AND SHITS{}", "!");
+
+    blog_os::init(); 
+    x86_64::instructions::interrupts::int3();
 
 
 
 
-    //Running tests through _start rather than the default "main"
+
+
     #[cfg(test)]
     test_main();
 
-    loop{}
+
+    println!("program did not crash");
+    loop {}
 }
 
- 
-//Called on panic
-use core::panic::PanicInfo;
-#[cfg(not(test))] // new attribute
+/// This function is called on panic.
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     loop {}
 }
-//Setting up custom testing framework
+
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
-    serial_println!("Error: {}\n", info);
-    exit_qemu(QemuExitCode::Failed);
-    loop {}
-}
-
-fn test_runner(tests: &[&dyn Fn()]) {
-    println!("Running {} tests", tests.len());
-    for test in tests {
-        test();
-    }
-
-    exit_qemu(QemuExitCode::Success);
-}
-
-#[test_case]
-fn trivial_assertion() {
-    print!("trivial assertion... ");
-    assert_eq!(1, 1);
-    println!("[ok]");
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-pub enum QemuExitCode {
-    Success = 0x10,
-    Failed = 0x11,
-}
-
-pub fn exit_qemu(exit_code: QemuExitCode) {
-    use x86_64::instructions::port::Port;
-
-    unsafe {
-        let mut port = Port::new(0xf4);
-        port.write(exit_code as u32);
-    }
+    blog_os::test_panic_handler(info)
 }
