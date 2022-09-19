@@ -10,13 +10,7 @@ use blog_os::println;
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("DIRTY HARD CRAPS AND SHITS{}", "!");
-
     blog_os::init(); 
-    x86_64::instructions::interrupts::int3();
-
-
-
-
 
 
     #[cfg(test)]

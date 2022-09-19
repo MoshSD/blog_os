@@ -1,3 +1,5 @@
+//Main lib that links all of the other parts of the project
+
 #![no_std]
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
@@ -8,13 +10,16 @@
 pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
+pub mod gdt;
+
 
 use core::panic::PanicInfo;
 
 
-
+//Init
 pub fn init() {
-    interrupts::init_idt();
+    gdt::init();
+    interrupts::init_idt();    
 }
 
 
@@ -26,7 +31,6 @@ pub extern "C" fn _start() -> ! {
     test_main();
     loop {}
 }
-
 
 pub trait Testable {
     fn run(&self) -> ();
@@ -43,6 +47,7 @@ where
     }
 }
 
+
 pub fn test_runner(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());
     for test in tests {
@@ -50,6 +55,7 @@ pub fn test_runner(tests: &[&dyn Testable]) {
     }
     exit_qemu(QemuExitCode::Success);
 }
+
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
@@ -65,12 +71,14 @@ fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info)
 }
 
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum QemuExitCode {
     Success = 0x10,
     Failed = 0x11,
 }
+
 
 pub fn exit_qemu(exit_code: QemuExitCode) {
     use x86_64::instructions::port::Port;
