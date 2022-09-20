@@ -20,6 +20,10 @@ use core::panic::PanicInfo;
 pub fn init() {
     gdt::init();
     interrupts::init_idt();    
+
+    //Initialising and enabling the interrupt handler
+    unsafe { interrupts::PICS.lock().initialize() }; 
+    x86_64::instructions::interrupts::enable();
 }
 
 
@@ -86,5 +90,12 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
     unsafe {
         let mut port = Port::new(0xf4);
         port.write(exit_code as u32);
+    }
+}
+
+//Loop that will save cpu resources 
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
     }
 }
