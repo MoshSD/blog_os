@@ -6,6 +6,7 @@
 
 use core::panic::PanicInfo;
 use blog_os::println;
+use x86_64::structures::paging::page_table::PageTableLevel;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
