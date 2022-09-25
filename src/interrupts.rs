@@ -1,6 +1,6 @@
 //Interrupt handler
 use core::u8;
-use x86_64::instructions::hlt;
+//use x86_64::instructions::hlt;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 use x86_64::structures::idt::PageFaultErrorCode;
 use crate::hlt_loop;
