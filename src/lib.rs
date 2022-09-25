@@ -11,10 +11,22 @@ pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
 pub mod gdt;
-
+pub mod memory;
 
 use core::panic::PanicInfo;
+#[cfg(test)]
+use bootloader::{entry_point, BootInfo};
+#[cfg(test)]
+entry_point!(test_kernel_main);
 
+
+//Entry point for cargo test
+#[cfg(test)]
+fn test_kernel_main(_boot_info: &'static BootInfo) -> !{
+    init();
+    test_main();
+    loop {}
+}
 
 //Init
 pub fn init() {
@@ -27,14 +39,10 @@ pub fn init() {
 }
 
 
-/// Entry point for `cargo test`
-#[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
-    init();
-    test_main();
-    loop {}
-}
+
+
+
+
 
 pub trait Testable {
     fn run(&self) -> ();
