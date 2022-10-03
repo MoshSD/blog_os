@@ -1,5 +1,5 @@
 //Main lib that links all of the other parts of the project
-
+#![feature(const_mut_refs)]
 #![no_std]
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]

@@ -1,9 +1,23 @@
-use alloc::alloc::{GlobalAlloc, Layout};
+use alloc::{alloc::{GlobalAlloc, Layout}, collections::LinkedList};
 use core::ptr::null_mut;
 use linked_list_allocator::LockedHeap;
+use bump::BumpAllocator;
+use linked_list::LinkedListAllocator;
+
+pub mod fixed_size_block;
+pub mod linked_list;
+pub mod bump;
+
+// #[global_allocator]
+// static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
+
+
+// #[global_allocator]
+// static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
 
 #[global_allocator]
-static ALLOCATOR: LockedHeap = LockedHeap::empty();
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
+    
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024; //100KiB
@@ -14,6 +28,8 @@ use x86_64::{
     },
     VirtAddr,
 };
+
+use self::fixed_size_block::FixedSizeBlockAllocator;
 
 //Initialising the kernel heap with new pages
 pub fn init_heap(
@@ -48,7 +64,32 @@ pub fn init_heap(
 
 
 
+// Wrapper around spin::Mutex to allow for trait implementations
+pub struct Locked<A> {
+    inner: spin::Mutex<A>,
+}
 
+impl<A> Locked<A> {
+    pub const fn new(inner: A) -> Self  {
+        Locked {
+            inner: spin::Mutex::new(inner),
+        }
+    }
+
+    pub fn lock(&self) -> spin::MutexGuard<A> {
+        self.inner.lock()
+    }
+}
+
+//Allign the given address 'addr' upwards to alignment 'align'
+fn align_up(addr: usize, align: usize) -> usize {
+    let remainder = addr % align;
+    if remainder == 0 {
+        addr // addr already aligned
+    } else {
+        addr - remainder + align
+    }
+}
 
 
 // pub struct Dummy;
